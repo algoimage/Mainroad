@@ -1,4 +1,7 @@
 # General
+- id: archives_title
+  translation: "Archives"
+
 - id: read_more
   translation: "Read more…"
 

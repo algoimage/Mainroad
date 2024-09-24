@@ -1,4 +1,7 @@
 # General
+- id: archives_title
+  translation: "アーカイブ"
+
 - id: read_more
   translation: "続きを読む…"
 
