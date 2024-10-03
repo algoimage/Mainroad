@@ -4,12 +4,15 @@
 	<h4 class="widget__title">{{ T "archives_title" }}</h4>
 	<div class="widget__content">
 		<ul class="widget__list">
+		{{- $sortedArchives := slice }}
 		{{- range $name, $taxonomy := $archives }}
-			{{- with $.Site.GetPage (printf "/archives/%s" $name) }}
+			{{- $sortedArchives = $sortedArchives | append (dict "name" $name "taxonomy" $taxonomy) }}
+		{{- end }}
+		{{- $sortedArchives = sort $sortedArchives "name" "desc" }}
+		{{- range $archive := $sortedArchives }}
 			<li class="widget__item">
-				<a class="widget__link" href="{{ .RelPermalink }}">{{ .Title }} ({{ $taxonomy.Count }})</a>
+				<a class="widget__link" href="{{ printf "/archives/%s" $archive.name | relLangURL }}">{{ $archive.name }} ({{ $archive.taxonomy.Count }})</a>
 			</li>
-			{{- end }}
 		{{- end }}
 		</ul>
 	</div>
