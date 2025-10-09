@@ -1,3 +1,36 @@
-{{ if and .IsPage (eq (.Param "mathjax") true) }}
-<script src="{{ .Param "mathjaxPath" | default "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js" }}{{ with .Param "mathjaxConfig" | default "TeX-AMS-MML_HTMLorMML" }}?config={{ . }}{{ end }}" async></script>
+{{/* MathJax v3 loader (Mainroad互換)
+   条件:
+     - ページ自身が mathjax: true
+     - もしくは Site 全体 params.mathjax: true
+     - もしくは home/section/taxonomy/term で配下に mathjax: true な記事が1つ以上
+*/}}
+
+{{ $.Scratch.Set "need" (or (.Param "mathjax") (.Site.Params.mathjax)) }}
+
+{{ if not ($.Scratch.Get "need") }}
+  {{ $kind := .Kind }}
+  {{ if eq $kind "home" }}
+    {{/* トップページ: サイト全体の通常記事から判定 */}}
+    {{ $.Scratch.Set "need" (gt (len (where .Site.RegularPages "Params.mathjax" true)) 0) }}
+  {{ else if or (eq $kind "section") (eq $kind "taxonomy") (eq $kind "term") }}
+    {{/* 一覧系: そのページの .Pages から判定（無ければ .RegularPages をフォールバック） */}}
+    {{ $pages := .Pages }}
+    {{ if not $pages }}{{ $pages = .RegularPages }}{{ end }}
+    {{ $.Scratch.Set "need" (gt (len (where $pages "Params.mathjax" true)) 0) }}
+  {{ end }}
+{{ end }}
+
+{{ if $.Scratch.Get "need" }}
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$','$$'], ['\\[','\\]']],
+        processEscapes: true
+      },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 {{ end }}
